@@ -1,0 +1,104 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Screen dimensions
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+# Colors
+WHITE = (255, 255, 255)
+BLUE = (135, 206, 250)
+YELLOW = (255, 223, 0)
+RED = (255, 0, 0)
+BLACK = (0, 0, 0)
+
+# Set up the screen
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Submarine Mercury Collector")
+
+# Clock for controlling frame rate
+clock = pygame.time.Clock()
+
+# Submarine properties
+submarine_width = 80
+submarine_height = 40
+submarine_x = SCREEN_WIDTH // 2 - submarine_width // 2
+submarine_y = SCREEN_HEIGHT - 100
+submarine_speed = 5
+
+# Mercury orb properties
+orb_radius = 15
+orb_x = random.randint(orb_radius, SCREEN_WIDTH - orb_radius)
+orb_y = random.randint(orb_radius, SCREEN_HEIGHT // 2)
+
+# Obstacle (mine) properties
+mine_width = 40
+mine_height = 40
+mine_x = random.randint(0, SCREEN_WIDTH - mine_width)
+mine_y = random.randint(50, SCREEN_HEIGHT // 2)
+
+# Score
+score = 0
+
+# Font for score
+font = pygame.font.Font(None, 36)
+
+# Game loop
+running = True
+while running:
+    # Fill the screen with a water-blue background
+    screen.fill(BLUE)
+
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Get pressed keys for movement
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and submarine_x > 0:
+        submarine_x -= submarine_speed
+    if keys[pygame.K_RIGHT] and submarine_x < SCREEN_WIDTH - submarine_width:
+        submarine_x += submarine_speed
+    if keys[pygame.K_UP] and submarine_y > 0:
+        submarine_y -= submarine_speed
+    if keys[pygame.K_DOWN] and submarine_y < SCREEN_HEIGHT - submarine_height:
+        submarine_y += submarine_speed
+
+    # Check collision with mercury orb
+    if (submarine_x < orb_x < submarine_x + submarine_width and
+        submarine_y < orb_y < submarine_y + submarine_height):
+        score += 1
+        orb_x = random.randint(orb_radius, SCREEN_WIDTH - orb_radius)
+        orb_y = random.randint(orb_radius, SCREEN_HEIGHT // 2)
+
+    # Check collision with mine
+    if (submarine_x < mine_x + mine_width and
+        submarine_x + submarine_width > mine_x and
+        submarine_y < mine_y + mine_height and
+        submarine_y + submarine_height > mine_y):
+        print("Game Over!")
+        running = False
+
+    # Draw the submarine
+    pygame.draw.rect(screen, YELLOW, (submarine_x, submarine_y, submarine_width, submarine_height))
+
+    # Draw the mercury orb
+    pygame.draw.circle(screen, WHITE, (orb_x, orb_y), orb_radius)
+
+    # Draw the obstacle (mine)
+    pygame.draw.rect(screen, RED, (mine_x, mine_y, mine_width, mine_height))
+
+    # Display the score
+    score_text = font.render(f"Score: {score}", True, BLACK)
+    screen.blit(score_text, (10, 10))
+
+    # Update the display
+    pygame.display.flip()
+    clock.tick(30)  # Cap the game at 30 frames per second
+
+# Quit the game
+pygame.quit()
